@@ -1,5 +1,5 @@
-from datetime import datetime, timezone
 from dataclasses import dataclass
+from datetime import datetime, timezone
 
 from marketplace.domain.entities.identity import Identity
 from marketplace.domain.entities.user.hasher import PasswordHasher
@@ -16,6 +16,7 @@ class CreateUserRequest:
     password: str
     phone: str
 
+
 class UserFactory:
     def __init__(
         self, user_repository: UserRepository, hasher: PasswordHasher
@@ -23,11 +24,9 @@ class UserFactory:
         self._user_repository = user_repository
         self._hasher = hasher
 
-    async def create(
-        self, data: CreateUserRequest
-    ) -> User:
-        is_email_unique = (
-            await self._user_repository.is_email_unique(data.email)
+    async def create(self, data: CreateUserRequest) -> User:
+        is_email_unique = await self._user_repository.is_email_unique(
+            data.email
         )
 
         if not is_email_unique:
