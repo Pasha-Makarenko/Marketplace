@@ -1,6 +1,3 @@
-
-
-
 class DomainError(Exception):
     def __init__(self, message: str | None = None) -> None:
         super().__init__(message or "Domain Error")
@@ -9,6 +6,7 @@ class DomainError(Exception):
 class BaseNotFound(Exception):
     def __init__(self, message: str = "Resource not found") -> None:
         super().__init__(message)
+
 
 class EntityNotFound(BaseNotFound):
     def __init__(self, field_name: str, value: int) -> None:

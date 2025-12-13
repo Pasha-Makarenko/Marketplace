@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-
 from presentation.web.root import root_router
 
 

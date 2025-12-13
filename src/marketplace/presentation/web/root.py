@@ -1,5 +1,4 @@
 from fastapi import APIRouter
-
 from presentation.web.user import user_router
 
 root_router = APIRouter()

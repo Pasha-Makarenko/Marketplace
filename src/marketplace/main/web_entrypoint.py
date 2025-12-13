@@ -1,34 +1,20 @@
-from contextlib import asynccontextmanager
-from typing import AsyncContextManager, AsyncIterator, Callable
-
 from dishka import AsyncContainer
 from dishka.integrations.fastapi import setup_dishka
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse
-
-from cryptoapp.main.config import load_config
-from cryptoapp.main.di.setup import setup_ioc_container
-from cryptoapp.main.taskiq_entry.broker import create_broker
-from cryptoapp.main.web_errors import register_exception_handlers
+from main.config import load_config
+from main.di.setup import setup_ioc_container
+from main.init_routers import init_routers
+from main.log import setup_logging
+from main.web_errors import register_exception_handlers
 
 
 def create_app(container: AsyncContainer) -> FastAPI:
-    app = FastAPI(
-        default_response_class=ORJSONResponse,
-        openapi_prefix="/api"
-    )
-
-    origins_dev = [
-        "http://localhost",
-        "http://127.0.0.1",
-        "http://localhost:4242",
-        "http://127.0.0.1:4242",
-    ]
+    app = FastAPI(default_response_class=ORJSONResponse, openapi_prefix="/api")
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=origins_dev,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -42,9 +28,9 @@ def create_app(container: AsyncContainer) -> FastAPI:
 
     return app
 
+
 def main() -> FastAPI:
     config = load_config()
-    broker = create_broker(config)
-    container = setup_ioc_container(config=config, broker=broker)
-    app = create_app(broker=broker, container=container)
+    container = setup_ioc_container(config=config)
+    app = create_app(container=container)
     return app
