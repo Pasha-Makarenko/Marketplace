@@ -1,5 +1,8 @@
-from application.common.transaction_manager import TransactionManager
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from marketplace.application.common.transaction_manager import (
+    TransactionManager,
+)
 
 
 class SQLAlchemyTransactionManager(TransactionManager):

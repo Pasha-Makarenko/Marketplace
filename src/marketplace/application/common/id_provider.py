@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Protocol
 
-from domain.user import User
+from marketplace.domain.user import User
 
 
 class IdProvider(Protocol):

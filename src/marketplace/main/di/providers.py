@@ -1,13 +1,17 @@
 from typing import AsyncIterable
 
 from dishka import Provider, Scope, provide
-from infrastructure.persistence.setup import create_engine, create_session_pool
-from main.config import DbConfig
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
     async_sessionmaker,
 )
+
+from marketplace.infrastructure.persistence.setup import (
+    create_engine,
+    create_session_pool,
+)
+from marketplace.main.config import DbConfig
 
 
 class DbProvider(Provider):

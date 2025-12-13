@@ -3,15 +3,16 @@ from dishka.integrations.fastapi import setup_dishka
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse
-from main.config import load_config
-from main.di.setup import setup_ioc_container
-from main.init_routers import init_routers
-from main.log import setup_logging
-from main.web_errors import register_exception_handlers
+
+from marketplace.main.config import load_config
+from marketplace.main.di.setup import setup_ioc_container
+from marketplace.main.init_routers import init_routers
+from marketplace.main.log import setup_logging
+from marketplace.main.web_errors import register_exception_handlers
 
 
 def create_app(container: AsyncContainer) -> FastAPI:
-    app = FastAPI(default_response_class=ORJSONResponse, openapi_prefix="/api")
+    app = FastAPI(default_response_class=ORJSONResponse, root_path="/api")
 
     app.add_middleware(
         CORSMiddleware,
