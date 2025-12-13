@@ -1,0 +1,28 @@
+services:
+  backend:
+    container_name: api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - ${HOST_PORT:-8000}:8000
+    command: uvicorn marketplace.main.web_entrypoint:main --host 0.0.0.0 --port 8000 --reload --factory --use-colors
+    volumes:
+      - ./src/marketplace:/app/marketplace
+    depends_on:
+      - database
+
+  database:
+    image: postgres:16.4-alpine
+    container_name: postgres
+    env_file:
+      - .env
+    ports:
+      - ${POSTGRES_PORT:-5432}:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

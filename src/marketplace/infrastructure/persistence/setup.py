@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
+from marketplace.main.config import DbConfig
 
 
 def create_engine(db: DbConfig) -> AsyncEngine:

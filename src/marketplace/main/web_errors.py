@@ -1,9 +1,8 @@
-
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from starlette.requests import Request
 
-from domain.exceptions import DomainError, BaseNotFound
+from marketplace.domain.exceptions import BaseNotFound, DomainError
 
 
 async def business_logic_error_handler(

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from presentation.web.root import root_router
+from marketplace.presentation.web.root import root_router
 
 
 def init_routers(app: FastAPI) -> None:
