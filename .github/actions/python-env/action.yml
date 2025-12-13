@@ -1,0 +1,28 @@
+name: "Python env (uv)"
+description: "Set up Python with uv and install project dependencies using the lockfile"
+inputs:
+  python-version-file:
+    description: "Path to the file that declares the Python version (e.g. pyproject.toml)"
+    required: false
+    default: "pyproject.toml"
+  uv-version:
+    description: "Pinned uv version"
+    required: false
+    default: "0.9.17"
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version-file: ${{ inputs.python-version-file }}
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
+      with:
+        version: ${{ inputs.uv-version }}
+        enable-cache: true
+
+    - name: Install dependencies
+      shell: bash
+      run: uv sync --locked --all-extras --dev

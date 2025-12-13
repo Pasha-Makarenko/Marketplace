@@ -1,0 +1,92 @@
+[project]
+name = "marketplace"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Krak3nDev", email = "bihichnazar@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "colorlog>=6.10.1",
+    "dishka>=1.7.2",
+    "fastapi>=0.124.4",
+    "mypy>=1.19.0",
+    "psycopg>=3.3.2",
+    "pytest>=9.0.2",
+    "sqlalchemy>=2.0.45",
+]
+
+[project.scripts]
+marketplace = "marketplace:main"
+
+[build-system]
+requires = ["uv_build>=0.8.3,<0.9.0"]
+build-backend = "uv_build"
+
+
+[tool.ruff]
+line-length = 79
+indent-width = 4
+target-version = "py312"
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "E501", "I"]
+ignore = []
+fixable = ["ALL"]
+
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
+
+
+exclude = [
+    "tests/",
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+
+[tool.mypy]
+disallow_subclassing_any = false
+ignore_missing_imports = true
+disable_error_code = "import-untyped,misc,no-any-return"
+strict = true
+exclude = [
+    "\\.git",
+    "\\.venv",
+    "\\.idea",
+    "tests/",
+    "\\.cache",
+    "build",
+    "dist",
+    "scripts",
+]
