@@ -196,13 +196,13 @@ dependencies = [
     { name = "dishka" },
     { name = "fastapi" },
     { name = "psycopg" },
-    { name = "pytest" },
     { name = "sqlalchemy" },
 ]
 
 [package.dev-dependencies]
 dev = [
     { name = "mypy" },
+    { name = "pytest" },
     { name = "ruff" },
 ]
 
@@ -212,13 +212,13 @@ requires-dist = [
     { name = "dishka", specifier = ">=1.7.2" },
     { name = "fastapi", specifier = ">=0.124.4" },
     { name = "psycopg", specifier = ">=3.3.2" },
-    { name = "pytest", specifier = ">=9.0.2" },
     { name = "sqlalchemy", specifier = ">=2.0.45" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "mypy", specifier = ">=1.19.0" },
+    { name = "pytest", specifier = ">=9.0.2" },
     { name = "ruff", specifier = ">=0.14.9" },
 ]
 
