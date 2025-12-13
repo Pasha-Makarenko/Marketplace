@@ -7,7 +7,7 @@ from marketplace.domain.entities.user.repository import UserRepository
 from marketplace.domain.exceptions import DomainError
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class CreateSellerRequest:
     user_id: Identity
     store_name: str
