@@ -11,7 +11,6 @@ dependencies = [
     "colorlog>=6.10.1",
     "dishka>=1.7.2",
     "fastapi>=0.124.4",
-    "mypy>=1.19.0",
     "psycopg>=3.3.2",
     "pytest>=9.0.2",
     "sqlalchemy>=2.0.45",
@@ -89,4 +88,10 @@ exclude = [
     "build",
     "dist",
     "scripts",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.19.0",
+    "ruff>=0.14.9",
 ]
