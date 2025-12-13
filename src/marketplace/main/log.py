@@ -14,7 +14,7 @@ def parse_logging_config(path: str | Path | None = None) -> dict[str, Any]:
 
     with config_path.open("r", encoding="utf-8") as f:
         config = json.load(f)
-    return config  # type: ignore
+    return config
 
 
 def setup_logging() -> None:
