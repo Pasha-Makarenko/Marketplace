@@ -2,7 +2,7 @@ class ApplicationError(Exception):
     pass
 
 
-class ValidationError(Exception):
+class ValidationError(ApplicationError):
     def __init__(self, message: str | None = None) -> None:
         super().__init__(message or "Validation Error")
 

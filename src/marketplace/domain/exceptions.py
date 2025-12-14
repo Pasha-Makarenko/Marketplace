@@ -12,3 +12,8 @@ class EntityNotFound(BaseNotFound):
     def __init__(self, field_name: str, value: int) -> None:
         message = f"{field_name} with ID {value} not found"
         super().__init__(message)
+
+
+class ValidationError(DomainError):
+    def __init__(self, message: str | None = None) -> None:
+        super().__init__(message or "Validation Error")

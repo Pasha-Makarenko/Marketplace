@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from marketplace.domain.entities.identity import Identity
+from marketplace.domain.entities.user.value_objects import Phone
 
 
 @dataclass
@@ -11,7 +12,7 @@ class User:
     last_name: str
     email: str
     hashed_password: str
-    phone: str
+    phone: Phone
     registered_at: datetime
 
     @property
