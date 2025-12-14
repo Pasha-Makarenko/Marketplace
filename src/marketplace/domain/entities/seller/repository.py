@@ -7,11 +7,11 @@ from marketplace.domain.entities.seller.seller import Seller
 
 class SellerRepository(Protocol):
     @abstractmethod
-    def by_identity(self, seller_id: Identity) -> Seller | None:
+    async def by_identity(self, seller_id: Identity) -> Seller | None:
         raise NotImplementedError
 
     @abstractmethod
-    def is_user_identity_unique(self, user_id: Identity) -> bool:
+    async def is_user_identity_unique(self, user_id: Identity) -> bool:
         raise NotImplementedError
 
     @abstractmethod
