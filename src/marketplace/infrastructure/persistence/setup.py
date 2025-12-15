@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
+# ensure mappers are registered
 from marketplace.main.config import DbConfig
 
 
