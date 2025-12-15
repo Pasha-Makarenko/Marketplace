@@ -11,10 +11,6 @@ class CategoryRepository(Protocol):
         raise NotImplementedError
 
     @abstractmethod
-    async def list_active(self) -> list[Category]:
-        raise NotImplementedError
-
-    @abstractmethod
     def add(self, category: Category) -> None:
         raise NotImplementedError
 
