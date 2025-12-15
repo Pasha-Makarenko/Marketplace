@@ -9,18 +9,23 @@ from sqlalchemy.ext.asyncio import (
 
 from marketplace.application.category.create import CreateCategory
 from marketplace.application.category.delete import DeleteCategory
+from marketplace.application.category.get import GetCategory
+from marketplace.application.category.list import ListCategories
 from marketplace.application.common.id_provider import IdProvider
 from marketplace.application.common.transaction_manager import (
     TransactionManager,
 )
 from marketplace.application.product.create import CreateProduct
 from marketplace.application.product.delete import DeleteProduct
+from marketplace.application.product.get import GetProduct
+from marketplace.application.product.list import ListProducts
 from marketplace.application.product.update import UpdateProduct
 from marketplace.application.seller.create import CreateSeller
+from marketplace.application.seller.get import GetSeller
+from marketplace.application.seller.list import ListSellers
 from marketplace.application.seller.update import UpdateSeller
 from marketplace.application.user.register import RegisterUserCommand
 from marketplace.domain.entities.category.repository import CategoryRepository
-from marketplace.domain.entities.product.factory import ProductFactory
 from marketplace.domain.entities.product.repository import ProductRepository
 from marketplace.domain.entities.seller.factory import SellerFactory
 from marketplace.domain.entities.seller.repository import SellerRepository
@@ -126,6 +131,8 @@ class CategoryProvider(Provider):
     )
     create_category = provide(scope=Scope.REQUEST, source=CreateCategory)
     delete_category = provide(scope=Scope.REQUEST, source=DeleteCategory)
+    get_category = provide(scope=Scope.REQUEST, source=GetCategory)
+    list_categories = provide(scope=Scope.REQUEST, source=ListCategories)
 
 
 class SellerProvider(Provider):
@@ -137,6 +144,8 @@ class SellerProvider(Provider):
     factory = provide(scope=Scope.REQUEST, source=SellerFactory)
     create_seller = provide(scope=Scope.REQUEST, source=CreateSeller)
     update_seller = provide(scope=Scope.REQUEST, source=UpdateSeller)
+    get_seller = provide(scope=Scope.REQUEST, source=GetSeller)
+    list_sellers = provide(scope=Scope.REQUEST, source=ListSellers)
 
 
 class ProductProvider(Provider):
@@ -145,7 +154,8 @@ class ProductProvider(Provider):
         source=SQLProductRepository,
         provides=AnyOf[ProductRepository, SQLProductRepository],
     )
-    factory = provide(scope=Scope.REQUEST, source=ProductFactory)
     create_product = provide(scope=Scope.REQUEST, source=CreateProduct)
     update_product = provide(scope=Scope.REQUEST, source=UpdateProduct)
     delete_product = provide(scope=Scope.REQUEST, source=DeleteProduct)
+    list_products = provide(scope=Scope.REQUEST, source=ListProducts)
+    get_product = provide(scope=Scope.REQUEST, source=GetProduct)
