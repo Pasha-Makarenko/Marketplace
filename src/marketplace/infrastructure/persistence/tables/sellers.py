@@ -20,12 +20,13 @@ from marketplace.infrastructure.persistence.tables.base import mapper_registry
 seller_profiles_table = Table(
     "seller_profiles",
     mapper_registry.metadata,
-    Column("id", Integer, primary_key=True, autoincrement=True),
+    Column("seller_id", Integer, primary_key=True, autoincrement=True),
     Column(
         "user_id",
         Integer,
         ForeignKey("users.users.id", ondelete="CASCADE"),
         nullable=False,
+        unique=True,
     ),
     Column("store_name", String(255), nullable=False),
     Column("store_logs", String(255), nullable=True),
@@ -47,7 +48,7 @@ mapper_registry.map_imperatively(
     Seller,
     seller_profiles_table,
     properties={
-        "identity": composite(Identity, seller_profiles_table.c.id),
+        "identity": composite(Identity, seller_profiles_table.c.seller_id),
         "user_id": composite(Identity, seller_profiles_table.c.user_id),
         "store_name": seller_profiles_table.c.store_name,
         "store_logs": seller_profiles_table.c.store_logs,
