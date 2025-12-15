@@ -28,7 +28,12 @@ users_table = Table(
     Column("last_name", String(length=LAST_NAME_LENGTH), nullable=False),
     Column("email", String(length=EMAIL_LENGTH), nullable=False, unique=True),
     Column("hashed_password", String(HASHED_PASSWORD_LENGTH), nullable=False),
-    Column("phone", String(length=PHONE_MAX_LENGTH), nullable=False),
+    Column(
+        "phone",
+        String(length=PHONE_MAX_LENGTH),
+        nullable=False,
+        key="phone_value",
+    ),
     Column(
         "registered_at",
         DateTime(timezone=True),
@@ -47,8 +52,7 @@ mapper_registry.map_imperatively(
         "last_name": users_table.c.last_name,
         "email": users_table.c.email,
         "hashed_password": users_table.c.hashed_password,
-        "phone": composite(Phone, users_table.c.phone),
+        "phone": composite(Phone, users_table.c.phone_value),
         "registered_at": users_table.c.registered_at,
     },
-    exclude_properties=["phone"],
 )

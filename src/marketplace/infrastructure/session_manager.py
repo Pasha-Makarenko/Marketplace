@@ -21,14 +21,24 @@ class SessionCookieDTO:
 
 
 class HTTPSessionManager:
-    def __init__(self, session_repo: SQLSessionRepository) -> None:
+    def __init__(
+        self,
+        session_repo: SQLSessionRepository,
+    ) -> None:
         self._session_repo = session_repo
-        self._ttl: timedelta = timedelta(hours=2)
+        self._ttl = timedelta(hours=2)
 
-    async def init_session(self, user_id: int) -> SessionCookieDTO:
+    async def init_session(
+        self,
+        user_id: int,
+        user_agent: str | None = None,
+        ip_address: str | None = None,
+    ) -> SessionCookieDTO:
         session = Session.create(
             user_id=user_id,
             ttl=self._ttl,
+            user_agent=user_agent,
+            ip_address=ip_address,
         )
 
         self._session_repo.add(session)
@@ -54,8 +64,19 @@ class FastAPISessionManager:
     def __init__(self, http_session_manager: HTTPSessionManager) -> None:
         self._http_session_manager = http_session_manager
 
-    async def init_session(self, user_id: int, response: Response) -> None:
-        session_cookie = await self._http_session_manager.init_session(user_id)
+    async def init_session(
+        self,
+        user_id: int,
+        response: Response,
+        *,
+        user_agent: str | None = None,
+        ip_address: str | None = None,
+    ) -> None:
+        session_cookie = await self._http_session_manager.init_session(
+            user_id=user_id,
+            user_agent=user_agent,
+            ip_address=ip_address,
+        )
         response.set_cookie(
             key=session_cookie.key,
             value=session_cookie.value,

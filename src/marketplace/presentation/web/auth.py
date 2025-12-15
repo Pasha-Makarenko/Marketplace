@@ -19,6 +19,7 @@ auth_router = APIRouter(
 @auth_router.post("/login", status_code=status.HTTP_200_OK)
 async def login(
     data: LoginAuthRequest,
+    request: Request,
     response: Response,
     transaction_manager: FromDishka[TransactionManager],
     auth_service: FromDishka[Auther],
@@ -27,7 +28,12 @@ async def login(
     user_id = await auth_service.authenticate(
         LoginAuthRequest(email=data.email, password=data.password)
     )
-    await session_manager.init_session(user_id, response=response)
+    await session_manager.init_session(
+        user_id,
+        response=response,
+        user_agent=request.headers.get("user-agent"),
+        ip_address=request.client.host if request.client else None,
+    )
     await transaction_manager.commit()
     return {"message": "You have successfully logged in."}
 

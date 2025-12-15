@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
 )
 
+from marketplace.application.common.id_provider import IdProvider
 from marketplace.application.common.transaction_manager import (
     TransactionManager,
 )
@@ -16,6 +17,9 @@ from marketplace.domain.entities.user.hasher import PasswordHasher
 from marketplace.domain.entities.user.repository import UserRepository
 from marketplace.infrastructure.auth import Auther
 from marketplace.infrastructure.hasher import Hasher
+from marketplace.infrastructure.persistence.session_repo import (
+    SQLSessionRepository,
+)
 from marketplace.infrastructure.persistence.setup import (
     create_engine,
     create_session_pool,
@@ -24,6 +28,15 @@ from marketplace.infrastructure.persistence.transaction_manager import (
     SQLTransactionManager,
 )
 from marketplace.infrastructure.persistence.user_repo import SQLUserRepository
+from marketplace.infrastructure.session_id_provider import (
+    FastAPISessionIDGetter,
+    HTTPIdentityProvider,
+    SessionIDGetter,
+)
+from marketplace.infrastructure.session_manager import (
+    FastAPISessionManager,
+    HTTPSessionManager,
+)
 from marketplace.main.config import DbConfig
 
 
@@ -41,7 +54,22 @@ class UserProvider(Provider):
     factory = provide(scope=Scope.REQUEST, source=UserFactory)
     register = provide(scope=Scope.REQUEST, source=RegisterUserCommand)
     auther = provide(scope=Scope.REQUEST, source=Auther)
+    http_identity_provider = provide(
+        source=HTTPIdentityProvider, provides=IdProvider, scope=Scope.REQUEST
+    )
+    session_id_getter = provide(
+        source=FastAPISessionIDGetter,
+        provides=SessionIDGetter,
+        scope=Scope.REQUEST,
+    )
+    session_repo = provide(source=SQLSessionRepository, scope=Scope.REQUEST)
 
+    http_session_manager = provide(
+        source=HTTPSessionManager, scope=Scope.REQUEST
+    )
+    fastapi_session_manager = provide(
+        source=FastAPISessionManager, scope=Scope.REQUEST
+    )
 
 
 class DbProvider(Provider):
