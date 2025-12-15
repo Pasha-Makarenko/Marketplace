@@ -23,5 +23,5 @@ class ProductRepository(Protocol):
         raise NotImplementedError
 
     @abstractmethod
-    def remove(self, product: Product) -> None:
+    async def remove(self, product: Product) -> None:
         raise NotImplementedError

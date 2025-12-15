@@ -33,6 +33,6 @@ class DeleteProduct:
                 value=data.product_id,
             )
 
-        self._product_repository.remove(product)
+        await self._product_repository.remove(product)
 
         await self._tr_manager.commit()

@@ -1,15 +1,12 @@
 from sqlalchemy import (
-    Boolean,
     CheckConstraint,
     Column,
-    DateTime,
     ForeignKey,
     Integer,
     Numeric,
     String,
     Table,
     Text,
-    text,
 )
 from sqlalchemy.orm import composite
 

@@ -15,5 +15,5 @@ class CategoryRepository(Protocol):
         raise NotImplementedError
 
     @abstractmethod
-    def remove(self, category: Category) -> None:
+    async def remove(self, category: Category) -> None:
         raise NotImplementedError

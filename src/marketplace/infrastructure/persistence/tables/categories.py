@@ -25,7 +25,9 @@ categories_table = Table(
         ForeignKey("categories.category_id", ondelete="SET NULL"),
         nullable=True,
     ),
-    CheckConstraint("category_id <> parent_category_id", "ch_categories_parent_category_id"),
+    CheckConstraint(
+        "category_id <> parent_category_id", "ch_categories_parent_category_id"
+    ),
 )
 
 mapper_registry.map_imperatively(

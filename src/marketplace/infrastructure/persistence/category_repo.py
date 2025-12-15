@@ -1,4 +1,3 @@
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from marketplace.domain.entities.category.category import Category
@@ -16,5 +15,5 @@ class SQLCategoryRepository(Repository[Category], CategoryRepository):
     async def by_identity(self, category_id: Identity) -> Category | None:
         return await self._session.get(self.model, category_id.value)
 
-    def remove(self, category: Category) -> None:
-        self._session.delete(category)
+    async def remove(self, category: Category) -> None:
+        await self._session.delete(category)

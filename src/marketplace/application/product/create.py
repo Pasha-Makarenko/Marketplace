@@ -46,7 +46,9 @@ class CreateProduct:
             )
 
         category_identity = Identity(data.category_id)
-        category = await self._category_repository.by_identity(category_identity)
+        category = await self._category_repository.by_identity(
+            category_identity
+        )
         if not category:
             raise EntityNotFound(
                 field_name="category_id",

@@ -33,6 +33,6 @@ class DeleteCategory:
                 value=data.category_id,
             )
 
-        self._category_repository.remove(category)
+        await self._category_repository.remove(category)
 
         await self._tr_manager.commit()

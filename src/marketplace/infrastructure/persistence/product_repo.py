@@ -26,5 +26,5 @@ class SQLProductRepository(Repository[Product], ProductRepository):
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
 
-    def remove(self, product: Product) -> None:
-        self._session.delete(self.model)
+    async def remove(self, product: Product) -> None:
+        await self._session.delete(self.model)
