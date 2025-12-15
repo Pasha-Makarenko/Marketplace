@@ -7,16 +7,37 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
 )
 
+from marketplace.application.category.create import CreateCategory
+from marketplace.application.category.delete import DeleteCategory
 from marketplace.application.common.id_provider import IdProvider
 from marketplace.application.common.transaction_manager import (
     TransactionManager,
 )
+from marketplace.application.product.create import CreateProduct
+from marketplace.application.product.delete import DeleteProduct
+from marketplace.application.product.update import UpdateProduct
+from marketplace.application.seller.create import CreateSeller
+from marketplace.application.seller.update import UpdateSeller
 from marketplace.application.user.register import RegisterUserCommand
+from marketplace.domain.entities.category.repository import CategoryRepository
+from marketplace.domain.entities.product.factory import ProductFactory
+from marketplace.domain.entities.product.repository import ProductRepository
+from marketplace.domain.entities.seller.factory import SellerFactory
+from marketplace.domain.entities.seller.repository import SellerRepository
 from marketplace.domain.entities.user.factory import UserFactory
 from marketplace.domain.entities.user.hasher import PasswordHasher
 from marketplace.domain.entities.user.repository import UserRepository
 from marketplace.infrastructure.auth import Auther
 from marketplace.infrastructure.hasher import Hasher
+from marketplace.infrastructure.persistence.category_repo import (
+    SQLCategoryRepository,
+)
+from marketplace.infrastructure.persistence.product_repo import (
+    SQLProductRepository,
+)
+from marketplace.infrastructure.persistence.seller_repo import (
+    SQLSellerRepository,
+)
 from marketplace.infrastructure.persistence.session_repo import (
     SQLSessionRepository,
 )
@@ -95,3 +116,36 @@ class DbProvider(Provider):
         provides=TransactionManager,
         scope=Scope.REQUEST,
     )
+
+
+class CategoryProvider(Provider):
+    category_repo = provide(
+        scope=Scope.REQUEST,
+        source=SQLCategoryRepository,
+        provides=AnyOf[CategoryRepository, SQLCategoryRepository],
+    )
+    create_category = provide(scope=Scope.REQUEST, source=CreateCategory)
+    delete_category = provide(scope=Scope.REQUEST, source=DeleteCategory)
+
+
+class SellerProvider(Provider):
+    seller_repo = provide(
+        scope=Scope.REQUEST,
+        source=SQLSellerRepository,
+        provides=AnyOf[SellerRepository, SQLSellerRepository],
+    )
+    factory = provide(scope=Scope.REQUEST, source=SellerFactory)
+    create_seller = provide(scope=Scope.REQUEST, source=CreateSeller)
+    update_seller = provide(scope=Scope.REQUEST, source=UpdateSeller)
+
+
+class ProductProvider(Provider):
+    product_repo = provide(
+        scope=Scope.REQUEST,
+        source=SQLProductRepository,
+        provides=AnyOf[ProductRepository, SQLProductRepository],
+    )
+    factory = provide(scope=Scope.REQUEST, source=ProductFactory)
+    create_product = provide(scope=Scope.REQUEST, source=CreateProduct)
+    update_product = provide(scope=Scope.REQUEST, source=UpdateProduct)
+    delete_product = provide(scope=Scope.REQUEST, source=DeleteProduct)
