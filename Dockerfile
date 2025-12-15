@@ -2,6 +2,8 @@
 
 FROM python:3.12-slim AS builder
 
+RUN apt-get update && apt-get install -y --no-install-recommends libpq5 libpq-dev && rm -rf /var/lib/apt/lists/*
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     UV_LINK_MODE=copy \
@@ -24,6 +26,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-editable
 
 FROM python:3.12-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends libpq5 libpq-dev && rm -rf /var/lib/apt/lists/*
 
 ENV PATH="/app/.venv/bin:${PATH}" \
     PYTHONDONTWRITEBYTECODE=1 \

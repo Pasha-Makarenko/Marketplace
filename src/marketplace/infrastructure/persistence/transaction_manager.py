@@ -5,7 +5,7 @@ from marketplace.application.common.transaction_manager import (
 )
 
 
-class SQLAlchemyTransactionManager(TransactionManager):
+class SQLTransactionManager(TransactionManager):
     def __init__(self, session: AsyncSession):
         self.session = session
 

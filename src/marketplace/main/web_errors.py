@@ -2,7 +2,11 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from starlette.requests import Request
 
-from marketplace.domain.exceptions import BaseNotFound, DomainError
+from marketplace.domain.exceptions import (
+    BaseNotFound,
+    DomainError,
+    ValidationError,
+)
 
 
 async def business_logic_error_handler(
@@ -17,6 +21,13 @@ async def resource_not_found(
     return ORJSONResponse(status_code=404, content={"detail": str(exception)})
 
 
+async def validation_exception_handler(
+    request: Request, exception: Exception
+) -> ORJSONResponse:
+    return ORJSONResponse(status_code=400, content={"detail": str(exception)})
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(DomainError, business_logic_error_handler)
     app.add_exception_handler(BaseNotFound, resource_not_found)
+    app.add_exception_handler(ValidationError, validation_exception_handler)
