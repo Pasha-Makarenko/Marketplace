@@ -16,6 +16,10 @@ class Category:
         self.name = name
 
     def set_parent(self, parent_category_id: Identity | None) -> None:
-        if parent_category_id and self.identity.value and parent_category_id.value == self.identity.value:
+        if (
+            parent_category_id
+            and self.identity.value
+            and parent_category_id.value == self.identity.value
+        ):
             raise DomainError("Category cannot be its own parent.")
         self.parent_category_id = parent_category_id
