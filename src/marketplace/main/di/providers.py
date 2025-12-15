@@ -15,6 +15,10 @@ from marketplace.application.common.id_provider import IdProvider
 from marketplace.application.common.transaction_manager import (
     TransactionManager,
 )
+from marketplace.application.order.cancel_order import CancelOrderCommand
+from marketplace.application.order.checkout_order import CheckoutOrderCommand
+from marketplace.application.order.fulfill_order import FulfillOrderCommand
+from marketplace.application.order.pay_order import PayOrderCommand
 from marketplace.application.product.create import CreateProduct
 from marketplace.application.product.delete import DeleteProduct
 from marketplace.application.product.get import GetProduct
@@ -26,6 +30,7 @@ from marketplace.application.seller.list import ListSellers
 from marketplace.application.seller.update import UpdateSeller
 from marketplace.application.user.register import RegisterUserCommand
 from marketplace.domain.entities.category.repository import CategoryRepository
+from marketplace.domain.entities.order.repository import OrderRepository
 from marketplace.domain.entities.product.repository import ProductRepository
 from marketplace.domain.entities.seller.factory import SellerFactory
 from marketplace.domain.entities.seller.repository import SellerRepository
@@ -36,6 +41,9 @@ from marketplace.infrastructure.auth import Auther
 from marketplace.infrastructure.hasher import Hasher
 from marketplace.infrastructure.persistence.category_repo import (
     SQLCategoryRepository,
+)
+from marketplace.infrastructure.persistence.order_repo import (
+    SQLOrderRepository,
 )
 from marketplace.infrastructure.persistence.product_repo import (
     SQLProductRepository,
@@ -54,6 +62,11 @@ from marketplace.infrastructure.persistence.transaction_manager import (
     SQLTransactionManager,
 )
 from marketplace.infrastructure.persistence.user_repo import SQLUserRepository
+from marketplace.infrastructure.queries.order_queries import (
+    DailyRevenueQuery,
+    OrderStatusStatsQuery,
+    UserOrdersQuery,
+)
 from marketplace.infrastructure.session_id_provider import (
     FastAPISessionIDGetter,
     HTTPIdentityProvider,
@@ -159,3 +172,22 @@ class ProductProvider(Provider):
     delete_product = provide(scope=Scope.REQUEST, source=DeleteProduct)
     list_products = provide(scope=Scope.REQUEST, source=ListProducts)
     get_product = provide(scope=Scope.REQUEST, source=GetProduct)
+
+
+class OrderProvider(Provider):
+    order_repo = provide(
+        source=SQLOrderRepository,
+        scope=Scope.REQUEST,
+        provides=AnyOf[OrderRepository, SQLOrderRepository],
+    )
+    checkout_order = provide(scope=Scope.REQUEST, source=CheckoutOrderCommand)
+    pay_order = provide(scope=Scope.REQUEST, source=PayOrderCommand)
+    fulfill_order = provide(scope=Scope.REQUEST, source=FulfillOrderCommand)
+    cancel_order = provide(scope=Scope.REQUEST, source=CancelOrderCommand)
+    user_orders_query = provide(scope=Scope.REQUEST, source=UserOrdersQuery)
+    status_stats_query = provide(
+        scope=Scope.REQUEST, source=OrderStatusStatsQuery
+    )
+    daily_revenue_query = provide(
+        scope=Scope.REQUEST, source=DailyRevenueQuery
+    )
