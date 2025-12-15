@@ -15,6 +15,7 @@ class Product:
     stock_quantity: int
     owner_id: Identity
     category_id: Identity
+    is_active: bool = True
 
     def change_name(self, name: str) -> None:
         if not name:
@@ -41,3 +42,9 @@ class Product:
 
     def change_category(self, category_id: Identity) -> None:
         self.category_id = category_id
+
+    def deactivate(self) -> None:
+        self.is_active = False
+
+    def activate(self) -> None:
+        self.is_active = True

@@ -1,12 +1,15 @@
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     Column,
+    DateTime,
     ForeignKey,
     Integer,
     Numeric,
     String,
     Table,
     Text,
+    func,
 )
 from sqlalchemy.orm import composite
 
@@ -35,6 +38,15 @@ products_table = Table(
         ForeignKey("categories.category_id", ondelete="RESTRICT"),
         nullable=False,
     ),
+    Column("created_at", DateTime, nullable=False, server_default=func.now()),
+    Column(
+        "updated_at",
+        DateTime,
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    ),
+    Column("is_active", Boolean, nullable=False, default=True),
     CheckConstraint("name <> ''", name="ch_products_name"),
     CheckConstraint("price >= 0", name="ch_products_price"),
     CheckConstraint("discount BETWEEN 0 AND 100", name="ch_products_discount"),
@@ -53,6 +65,6 @@ mapper_registry.map_imperatively(
         "stock_quantity": products_table.c.stock_quantity,
         "owner_id": composite(Identity, products_table.c.owner_id),
         "category_id": composite(Identity, products_table.c.category_id),
+        "is_active": products_table.c.is_active,
     },
-    exclude_properties=["created_at"],
 )
