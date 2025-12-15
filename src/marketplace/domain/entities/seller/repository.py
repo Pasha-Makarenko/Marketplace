@@ -11,6 +11,14 @@ class SellerRepository(Protocol):
         raise NotImplementedError
 
     @abstractmethod
+    async def by_user_id(self, user_id: int) -> Seller | None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def list(self, limit: int = 20, offset: int = 0) -> list[Seller]:
+        raise NotImplementedError
+
+    @abstractmethod
     async def is_user_identity_unique(self, user_id: Identity) -> bool:
         raise NotImplementedError
 
