@@ -29,8 +29,10 @@ from marketplace.application.seller.get import GetSeller
 from marketplace.application.seller.list import ListSellers
 from marketplace.application.seller.update import UpdateSeller
 from marketplace.application.user.register import RegisterUserCommand
+from marketplace.domain.entities.category.factory import CategoryFactory
 from marketplace.domain.entities.category.repository import CategoryRepository
 from marketplace.domain.entities.order.repository import OrderRepository
+from marketplace.domain.entities.product.factory import ProductFactory
 from marketplace.domain.entities.product.repository import ProductRepository
 from marketplace.domain.entities.seller.factory import SellerFactory
 from marketplace.domain.entities.seller.repository import SellerRepository
@@ -142,6 +144,7 @@ class CategoryProvider(Provider):
         source=SQLCategoryRepository,
         provides=AnyOf[CategoryRepository, SQLCategoryRepository],
     )
+    factory = provide(scope=Scope.REQUEST, source=CategoryFactory)
     create_category = provide(scope=Scope.REQUEST, source=CreateCategory)
     delete_category = provide(scope=Scope.REQUEST, source=DeleteCategory)
     get_category = provide(scope=Scope.REQUEST, source=GetCategory)
@@ -167,6 +170,7 @@ class ProductProvider(Provider):
         source=SQLProductRepository,
         provides=AnyOf[ProductRepository, SQLProductRepository],
     )
+    factory = provide(scope=Scope.REQUEST, source=ProductFactory)
     create_product = provide(scope=Scope.REQUEST, source=CreateProduct)
     update_product = provide(scope=Scope.REQUEST, source=UpdateProduct)
     delete_product = provide(scope=Scope.REQUEST, source=DeleteProduct)

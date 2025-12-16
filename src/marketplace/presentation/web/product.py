@@ -5,10 +5,7 @@ from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, Query, status
 
-from marketplace.application.product.create import (
-    CreateProduct,
-    ProductCreationRequest,
-)
+from marketplace.application.product.create import CreateProduct
 from marketplace.application.product.delete import (
     DeleteProduct,
     DeleteProductRequest,
@@ -22,6 +19,7 @@ from marketplace.application.product.update import (
     UpdateProduct,
     UpdateProductRequest,
 )
+from marketplace.domain.entities.product.factory import CreateProductRequest
 from marketplace.domain.entities.product.product import Product
 
 product_router = APIRouter(
@@ -33,7 +31,7 @@ product_router = APIRouter(
 
 @product_router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_product(
-    data: ProductCreationRequest,
+    data: CreateProductRequest,
     create_command: FromDishka[CreateProduct],
 ) -> dict[str, int]:
     product_id = await create_command(data)

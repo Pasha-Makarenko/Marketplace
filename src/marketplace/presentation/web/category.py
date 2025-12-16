@@ -2,10 +2,7 @@ from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, status
 
-from marketplace.application.category.create import (
-    CategoryCreationRequest,
-    CreateCategory,
-)
+from marketplace.application.category.create import CreateCategory
 from marketplace.application.category.delete import (
     DeleteCategory,
     DeleteCategoryRequest,
@@ -16,6 +13,7 @@ from marketplace.application.category.get import (
 )
 from marketplace.application.category.list import ListCategories
 from marketplace.domain.entities.category.category import Category
+from marketplace.domain.entities.category.factory import CreateCategoryRequest
 
 category_router = APIRouter(
     prefix="/categories",
@@ -26,7 +24,7 @@ category_router = APIRouter(
 
 @category_router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_category(
-    data: CategoryCreationRequest,
+    data: CreateCategoryRequest,
     create_command: FromDishka[CreateCategory],
 ) -> dict[str, int]:
     category_id = await create_command(data)
