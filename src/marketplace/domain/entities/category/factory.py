@@ -41,10 +41,16 @@ class CategoryFactory:
                     value=data.parent_category_id,
                 )
 
+        parent_identity = (
+            Identity(data.parent_category_id)
+            if data.parent_category_id is not None
+            else None
+        )
+
         category = Category(
             identity=Identity(_value=None),
             name=data.name,
-            parent_category_id=Identity(_value=data.parent_category_id),
+            parent_category_id=parent_identity,
         )
 
         self._category_repository.add(category)

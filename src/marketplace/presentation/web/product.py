@@ -21,6 +21,9 @@ from marketplace.application.product.update import (
 )
 from marketplace.domain.entities.product.factory import CreateProductRequest
 from marketplace.domain.entities.product.product import Product
+from marketplace.infrastructure.queries.product_analytics import (
+    ProductAnalyticsQuery,
+)
 
 product_router = APIRouter(
     prefix="/products",
@@ -58,6 +61,22 @@ async def list_products(
             offset=offset,
         )
     )
+
+
+@product_router.get("/analytics/top-rated", status_code=status.HTTP_200_OK)
+async def get_top_rated_products(
+    analytics: FromDishka[ProductAnalyticsQuery],
+    limit: Annotated[int, Query(ge=1, le=50)] = 10,
+) -> list[dict[str, object]]:
+    return await analytics.get_top_rated_products(limit=limit)
+
+
+@product_router.get("/analytics/low-stock", status_code=status.HTTP_200_OK)
+async def get_low_stock_products(
+    analytics: FromDishka[ProductAnalyticsQuery],
+    threshold: Annotated[int, Query(ge=1)] = 5,
+) -> list[dict[str, object]]:
+    return await analytics.get_low_stock_products(threshold=threshold)
 
 
 @product_router.get("/{product_id}", status_code=status.HTTP_200_OK)

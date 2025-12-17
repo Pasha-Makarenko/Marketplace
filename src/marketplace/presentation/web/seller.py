@@ -13,6 +13,9 @@ from marketplace.application.seller.update import (
 )
 from marketplace.domain.entities.seller.factory import CreateSellerRequest
 from marketplace.domain.entities.seller.seller import Seller
+from marketplace.infrastructure.queries.seller_analytics import (
+    SellerAnalyticsQuery,
+)
 
 seller_router = APIRouter(
     prefix="/sellers",
@@ -37,6 +40,14 @@ async def list_sellers(
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> list[Seller]:
     return await list_query(ListSellersRequest(limit=limit, offset=offset))
+
+
+@seller_router.get("/analytics/top", status_code=status.HTTP_200_OK)
+async def get_top_sellers(
+    analytics: FromDishka[SellerAnalyticsQuery],
+    limit: Annotated[int, Query(ge=1, le=50)] = 10,
+) -> list[dict[str, object]]:
+    return await analytics.get_top_sellers(limit=limit)
 
 
 @seller_router.get("/{seller_id}", status_code=status.HTTP_200_OK)
