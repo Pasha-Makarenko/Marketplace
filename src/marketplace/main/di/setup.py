@@ -7,6 +7,8 @@ from marketplace.main.di.providers import (
     DbProvider,
     OrderProvider,
     ProductProvider,
+    RatingProvider,
+    ReviewProvider,
     SellerProvider,
     UserProvider,
 )
@@ -21,6 +23,8 @@ def setup_ioc_container(config: Config) -> AsyncContainer:
         SellerProvider(),
         ProductProvider(),
         OrderProvider(),
+        ReviewProvider(),
+        RatingProvider(),
         context={
             Config: config,
             DbConfig: config.db,

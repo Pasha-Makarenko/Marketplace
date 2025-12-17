@@ -3,9 +3,6 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, EmailStr, StringConstraints
 
-from marketplace.application.common.transaction_manager import (
-    TransactionManager,
-)
 from marketplace.domain.entities.identity import Identity
 from marketplace.domain.entities.user.hasher import PasswordHasher
 from marketplace.domain.entities.user.repository import UserRepository
@@ -47,11 +44,9 @@ class UserFactory:
         self,
         user_repository: UserRepository,
         hasher: PasswordHasher,
-        transaction_manager: TransactionManager,
     ) -> None:
         self._user_repository = user_repository
         self._hasher = hasher
-        self._transaction_manager = transaction_manager
 
     async def create(self, data: CreateUserRequest) -> User:
         is_email_unique = await self._user_repository.is_email_unique(
@@ -74,9 +69,5 @@ class UserFactory:
             phone=phone,
             registered_at=datetime.now(timezone.utc),
         )
-
-        self._user_repository.add(user)
-
-        await self._transaction_manager.flush()
 
         return user

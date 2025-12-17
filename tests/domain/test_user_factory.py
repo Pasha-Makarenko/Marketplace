@@ -54,7 +54,7 @@ class FakeUserRepository(UserRepository):
 @pytest.mark.asyncio
 async def test_create_user_success() -> None:
     repo = FakeUserRepository()
-    factory = UserFactory(repo, FakeHasher(), FakeTransactionManager())
+    factory = UserFactory(repo, FakeHasher())
     req = CreateUserRequest(
         first_name="John",
         last_name="Doe",
@@ -65,16 +65,14 @@ async def test_create_user_success() -> None:
 
     user = await factory.create(req)
 
-    assert user.identity.value == 1
     assert user.email == "user@example.com"
     assert user.hashed_password == "hashed:supersecret"
-    assert repo._by_email["user@example.com"] is user
 
 
 @pytest.mark.asyncio
 async def test_duplicate_email_raises_domain_error() -> None:
     repo = FakeUserRepository()
-    factory = UserFactory(repo, FakeHasher(), FakeTransactionManager())
+    factory = UserFactory(repo, FakeHasher())
     req = CreateUserRequest(
         first_name="John",
         last_name="Doe",
@@ -83,7 +81,8 @@ async def test_duplicate_email_raises_domain_error() -> None:
         phone="+380501112233",
     )
 
-    await factory.create(req)
+    user = await factory.create(req)
+    repo.add(user)
 
     with pytest.raises(DomainError):
         await factory.create(req)

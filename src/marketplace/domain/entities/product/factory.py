@@ -3,10 +3,6 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
-from marketplace.application.common.id_provider import IdProvider
-from marketplace.application.common.transaction_manager import (
-    TransactionManager,
-)
 from marketplace.domain.entities.category.repository import CategoryRepository
 from marketplace.domain.entities.identity import Identity
 from marketplace.domain.entities.product.product import Product
@@ -34,17 +30,14 @@ class ProductFactory:
         product_repository: ProductRepository,
         seller_repository: SellerRepository,
         category_repository: CategoryRepository,
-        transaction_manager: TransactionManager,
-        id_provider: IdProvider,
     ) -> None:
         self._product_repository = product_repository
         self._seller_repository = seller_repository
         self._category_repository = category_repository
-        self._transaction_manager = transaction_manager
-        self._id_provider = id_provider
 
-    async def create(self, data: CreateProductRequest) -> Product:
-        user_id = await self._id_provider.get_current_user_id()
+    async def create(
+        self, data: CreateProductRequest, user_id: int
+    ) -> Product:
         owner = await self._seller_repository.by_user_id(user_id)
         if not owner:
             raise DomainError("User is not a seller.")
@@ -70,9 +63,5 @@ class ProductFactory:
             category_id=category_identity,
             is_active=True,
         )
-
-        self._product_repository.add(product)
-
-        await self._transaction_manager.flush()
 
         return product

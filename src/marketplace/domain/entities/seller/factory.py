@@ -2,9 +2,6 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, StringConstraints
 
-from marketplace.application.common.transaction_manager import (
-    TransactionManager,
-)
 from marketplace.domain.entities.identity import Identity
 from marketplace.domain.entities.seller.repository import SellerRepository
 from marketplace.domain.entities.seller.seller import Seller
@@ -29,11 +26,9 @@ class SellerFactory:
         self,
         seller_repository: SellerRepository,
         user_repository: UserRepository,
-        transaction_manager: TransactionManager,
     ) -> None:
         self._seller_repository = seller_repository
         self._user_repository = user_repository
-        self._transaction_manager = transaction_manager
 
     async def create(self, data: CreateSellerRequest) -> Seller:
         user_identity = Identity(data.user_id)
@@ -64,9 +59,5 @@ class SellerFactory:
             delivery_terms=data.delivery_terms,
             is_active=True,
         )
-
-        self._seller_repository.add(seller)
-
-        await self._transaction_manager.flush()
 
         return seller

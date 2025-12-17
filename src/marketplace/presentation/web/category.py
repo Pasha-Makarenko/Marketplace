@@ -14,6 +14,9 @@ from marketplace.application.category.get import (
 from marketplace.application.category.list import ListCategories
 from marketplace.domain.entities.category.category import Category
 from marketplace.domain.entities.category.factory import CreateCategoryRequest
+from marketplace.infrastructure.queries.category_analytics import (
+    CategoryAnalyticsQuery,
+)
 
 category_router = APIRouter(
     prefix="/categories",
@@ -36,6 +39,13 @@ async def list_categories(
     list_query: FromDishka[ListCategories],
 ) -> list[Category]:
     return await list_query()
+
+
+@category_router.get("/analytics/distribution", status_code=status.HTTP_200_OK)
+async def get_category_distribution(
+    analytics: FromDishka[CategoryAnalyticsQuery],
+) -> list[dict[str, object]]:
+    return await analytics.get_category_distribution()
 
 
 @category_router.get("/{category_id}", status_code=status.HTTP_200_OK)

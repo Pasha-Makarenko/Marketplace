@@ -2,9 +2,6 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, StringConstraints
 
-from marketplace.application.common.transaction_manager import (
-    TransactionManager,
-)
 from marketplace.domain.entities.category.category import Category
 from marketplace.domain.entities.category.repository import CategoryRepository
 from marketplace.domain.entities.identity import Identity
@@ -24,10 +21,8 @@ class CategoryFactory:
     def __init__(
         self,
         category_repository: CategoryRepository,
-        transaction_manager: TransactionManager,
     ) -> None:
         self._category_repository = category_repository
-        self._transaction_manager = transaction_manager
 
     async def create(self, data: CreateCategoryRequest) -> Category:
         if data.parent_category_id is not None:
@@ -52,9 +47,5 @@ class CategoryFactory:
             name=data.name,
             parent_category_id=parent_identity,
         )
-
-        self._category_repository.add(category)
-
-        await self._transaction_manager.flush()
 
         return category
