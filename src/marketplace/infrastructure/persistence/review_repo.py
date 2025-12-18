@@ -21,7 +21,7 @@ class SQLReviewRepository(Repository[Review], ReviewRepository):
     ) -> list[Review]:
         query = (
             select(self.model)
-            .where(self.model.product_id == product_id)  # type: ignore
+            .where(self.model.product_id.value == product_id.value)  # type: ignore
             .limit(limit)
             .offset(offset)
             .order_by(self.model.created_at.desc())  # type: ignore

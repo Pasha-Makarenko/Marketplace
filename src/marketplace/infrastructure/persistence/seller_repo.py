@@ -16,9 +16,9 @@ class SQLSellerRepository(Repository[Seller], SellerRepository):
     async def by_identity(self, seller_id: Identity) -> Seller | None:
         return await self._session.get(self.model, seller_id.value)
 
-    async def by_user_id(self, user_id: int) -> Seller | None:
+    async def by_user_id(self, user_id: Identity) -> Seller | None:
         stmt = select(self.model).where(
-            self.model.user_id == Identity(_value=user_id)  # type: ignore
+            self.model.user_id.value == user_id.value  # type: ignore
         )
         return await self._session.scalar(stmt)
 
@@ -29,6 +29,6 @@ class SQLSellerRepository(Repository[Seller], SellerRepository):
 
     async def is_user_identity_unique(self, user_id: Identity) -> bool:
         stmt = select(self.model).where(
-            self.model.user_id == user_id  # type: ignore
+            self.model.user_id.value == user_id.value  # type: ignore
         )
         return (await self._session.scalar(stmt)) is None

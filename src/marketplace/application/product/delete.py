@@ -42,7 +42,9 @@ class DeleteProduct:
 
         user_id = await self._id_provider.get_current_user_id()
         await check_product_ownership(
-            product, user_id, self._seller_repository
+            product=product,
+            user_id=Identity(_value=user_id),
+            seller_repository=self._seller_repository,
         )
 
         product.deactivate()

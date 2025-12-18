@@ -2,6 +2,7 @@ from marketplace.application.common.id_provider import IdProvider
 from marketplace.application.common.transaction_manager import (
     TransactionManager,
 )
+from marketplace.domain.entities.identity import Identity
 from marketplace.domain.entities.product.factory import (
     CreateProductRequest,
     ProductFactory,
@@ -25,7 +26,8 @@ class CreateProduct:
     async def __call__(self, data: CreateProductRequest) -> int:
         user_id = await self._id_provider.get_current_user_id()
         product = await self._product_factory.create(
-            data=data, user_id=user_id
+            data=data,
+            user_id=Identity(_value=user_id),
         )
 
         self._product_repository.add(product)

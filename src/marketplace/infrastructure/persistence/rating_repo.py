@@ -25,8 +25,6 @@ class SQLRatingRepository(Repository[Rating], RatingRepository):
             .where(ratings_table.c.product_id_val == product_id.value)
             .limit(limit)
             .offset(offset)
-            # .order_by(self.model.created_at.desc()) # created_at removed
-            # from model
         )
         result = await self._session.execute(query)
         return list(result.scalars().all())

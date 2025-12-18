@@ -11,7 +11,7 @@ class SellerRepository(Protocol):
         raise NotImplementedError
 
     @abstractmethod
-    async def by_user_id(self, user_id: int) -> Seller | None:
+    async def by_user_id(self, user_id: Identity) -> Seller | None:
         raise NotImplementedError
 
     @abstractmethod

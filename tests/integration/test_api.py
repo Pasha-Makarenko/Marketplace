@@ -16,6 +16,9 @@ from marketplace.main.config import Config, load_config
 from marketplace.main.di.setup import setup_ioc_container
 from marketplace.main.web_entrypoint import create_app
 
+if os.name == "nt":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 # ---------- Containers & config ----------
 
 
@@ -59,6 +62,8 @@ def postgres_container() -> AsyncIterator[PostgresContainer]:
 @pytest.fixture(scope="session")
 def config(postgres_container: PostgresContainer) -> Config:
     host = postgres_container.get_container_host_ip()
+    if isinstance(host, str) and host.startswith("npipe://"):
+        host = "localhost"
     port = int(postgres_container.get_exposed_port(5432))
 
     os.environ["POSTGRES_HOST"] = host

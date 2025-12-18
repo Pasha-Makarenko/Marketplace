@@ -36,7 +36,7 @@ class ProductFactory:
         self._category_repository = category_repository
 
     async def create(
-        self, data: CreateProductRequest, user_id: int
+        self, data: CreateProductRequest, user_id: Identity
     ) -> Product:
         owner = await self._seller_repository.by_user_id(user_id)
         if not owner:

@@ -19,12 +19,16 @@ class SQLProductRepository(Repository[Product], ProductRepository):
         return await self._session.get(self.model, product_id.value)
 
     async def list_by_seller(self, seller_id: Identity) -> list[Product]:
-        stmt = select(self.model).where(self.model.owner_id == seller_id)  # type: ignore
+        stmt = select(self.model).where(
+            self.model.owner_id.value == seller_id.value  # type: ignore
+        )
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
 
     async def list_by_category(self, category_id: Identity) -> list[Product]:
-        stmt = select(self.model).where(self.model.category_id == category_id)  # type: ignore
+        stmt = select(self.model).where(
+            self.model.category_id.value == category_id.value  # type: ignore
+        )
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
 
@@ -40,7 +44,9 @@ class SQLProductRepository(Repository[Product], ProductRepository):
         stmt = select(self.model).where(self.model.is_active == is_active)  # type: ignore
 
         if category_id:
-            stmt = stmt.where(self.model.category_id == category_id)  # type: ignore
+            stmt = stmt.where(
+                self.model.category_id.value == category_id.value  # type: ignore
+            )
         if min_price is not None:
             stmt = stmt.where(self.model.price >= min_price)  # type: ignore
         if max_price is not None:
