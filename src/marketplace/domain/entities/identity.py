@@ -16,9 +16,7 @@ class Identity:
     def __composite_values__(self) -> tuple[int | None]:
         return (self._value,)
 
-    def __eq__(
-        self, other: object
-    ) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Identity):
             return False
         return self._value == other._value
