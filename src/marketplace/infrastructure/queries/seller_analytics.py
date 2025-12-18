@@ -31,7 +31,7 @@ class SellerAnalyticsQuery:
                 FROM seller_profiles s
                 LEFT JOIN products p
                     ON p.owner_id = s.seller_id AND p.is_active = true
-                LEFT JOIN ratings rat ON rat.seller_id = s.seller_id
+                LEFT JOIN ratings rat ON rat.product_id = p.product_id
                 WHERE s.is_active = true
                 GROUP BY s.seller_id, s.store_name
             )

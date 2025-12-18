@@ -186,16 +186,12 @@ def upgrade() -> None:
         ),
         sa.Column("author_id", sa.Integer(), nullable=False),
         sa.Column("product_id", sa.Integer(), nullable=False),
-        sa.Column("rating", sa.Integer(), nullable=False),
         sa.Column("text", sa.Text(), nullable=True),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
-        ),
-        sa.CheckConstraint(
-            "rating BETWEEN 1 AND 5", name=op.f("ck_reviews_ch_reviews_rating")
         ),
         sa.ForeignKeyConstraint(
             ["author_id"],

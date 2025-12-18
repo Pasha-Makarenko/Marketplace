@@ -5,6 +5,7 @@ from marketplace.main.config import Config, DbConfig
 from marketplace.main.di.providers import (
     CategoryProvider,
     DbProvider,
+    FeedbackProvider,
     OrderProvider,
     ProductProvider,
     RatingProvider,
@@ -25,6 +26,7 @@ def setup_ioc_container(config: Config) -> AsyncContainer:
         OrderProvider(),
         ReviewProvider(),
         RatingProvider(),
+        FeedbackProvider(),
         context={
             Config: config,
             DbConfig: config.db,

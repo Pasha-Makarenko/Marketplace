@@ -49,7 +49,8 @@ mapper_registry.map_imperatively(
     seller_profiles_table,
     properties={
         "identity": composite(Identity, seller_profiles_table.c.seller_id),
-        "user_identity": composite(Identity, seller_profiles_table.c.user_id),
+        "user_id": composite(Identity, seller_profiles_table.c.user_id),
+        "_user_id_raw": seller_profiles_table.c.user_id,
         "store_name": seller_profiles_table.c.store_name,
         "store_logs": seller_profiles_table.c.store_logs,
         "contact_info": seller_profiles_table.c.contact_info,

@@ -28,11 +28,10 @@ def _ensure_docker_host() -> None:
     if os.environ.get("DOCKER_HOST"):
         return
     candidates = [
-        Path.home()
-        / ".colima/default/docker.sock",  # macOS Colima (default here)
-        Path("/var/run/docker.sock"),  # linux / docker desktop
-        Path.home() / ".docker/run/docker.sock",  # docker desktop on mac
-        Path.home() / ".orbstack/run/docker.sock",  # OrbStack
+        Path.home() / ".colima/default/docker.sock",
+        Path("/var/run/docker.sock"),
+        Path.home() / ".docker/run/docker.sock",
+        Path.home() / ".orbstack/run/docker.sock",
     ]
     for sock in candidates:
         if sock.exists():

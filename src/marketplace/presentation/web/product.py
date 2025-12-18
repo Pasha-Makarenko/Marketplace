@@ -4,6 +4,7 @@ from typing import Annotated
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter, Query, status
+from pydantic import BaseModel
 
 from marketplace.application.product.create import CreateProduct
 from marketplace.application.product.delete import (
@@ -32,6 +33,29 @@ product_router = APIRouter(
 )
 
 
+class UpdateProductPayload(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    price: Decimal | None = None
+    discount: int | None = None
+    stock_quantity: int | None = None
+    category_id: int | None = None
+
+
+def _product_to_dict(product: Product) -> dict[str, object]:
+    return {
+        "id": product.identity.value,
+        "name": product.name,
+        "description": product.description,
+        "price": float(product.price),
+        "discount": product.discount,
+        "stock_quantity": product.stock_quantity,
+        "owner_id": product.owner_id.value,
+        "category_id": product.category_id.value,
+        "is_active": product.is_active,
+    }
+
+
 @product_router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_product(
     data: CreateProductRequest,
@@ -50,8 +74,8 @@ async def list_products(
     is_active: Annotated[bool, Query()] = True,
     limit: Annotated[int, Query(ge=1, le=100)] = 20,
     offset: Annotated[int, Query(ge=0)] = 0,
-) -> list[Product]:
-    return await list_query(
+) -> list[dict[str, object]]:
+    products = await list_query(
         ListProductsRequest(
             category_id=category_id,
             min_price=min_price,
@@ -61,6 +85,7 @@ async def list_products(
             offset=offset,
         )
     )
+    return [_product_to_dict(p) for p in products]
 
 
 @product_router.get("/analytics/top-rated", status_code=status.HTTP_200_OK)
@@ -83,14 +108,15 @@ async def get_low_stock_products(
 async def get_product(
     product_id: int,
     get_query: FromDishka[GetProduct],
-) -> Product:
-    return await get_query(GetProductRequest(product_id=product_id))
+) -> dict[str, object]:
+    product = await get_query(GetProductRequest(product_id=product_id))
+    return _product_to_dict(product)
 
 
 @product_router.patch("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def update_product(
     product_id: int,
-    data: UpdateProductRequest,
+    data: UpdateProductPayload,
     update_command: FromDishka[UpdateProduct],
 ) -> None:
     request = UpdateProductRequest(

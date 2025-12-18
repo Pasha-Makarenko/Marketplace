@@ -17,9 +17,7 @@ class SQLSellerRepository(Repository[Seller], SellerRepository):
         return await self._session.get(self.model, seller_id.value)
 
     async def by_user_id(self, user_id: Identity) -> Seller | None:
-        stmt = select(self.model).where(
-            self.model.user_id.value == user_id.value  # type: ignore
-        )
+        stmt = select(self.model).where(self.model.user_id == user_id)  # type: ignore
         return await self._session.scalar(stmt)
 
     async def list(self, limit: int = 20, offset: int = 0) -> list[Seller]:
@@ -28,7 +26,5 @@ class SQLSellerRepository(Repository[Seller], SellerRepository):
         return list(result.scalars().all())
 
     async def is_user_identity_unique(self, user_id: Identity) -> bool:
-        stmt = select(self.model).where(
-            self.model.user_id.value == user_id.value  # type: ignore
-        )
+        stmt = select(self.model).where(self.model.user_id == user_id)  # type: ignore
         return (await self._session.scalar(stmt)) is None

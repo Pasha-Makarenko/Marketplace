@@ -54,8 +54,18 @@ async def get_top_sellers(
 async def get_seller(
     seller_id: int,
     get_query: FromDishka[GetSeller],
-) -> Seller:
-    return await get_query(GetSellerRequest(seller_id=seller_id))
+) -> dict[str, object]:
+    seller = await get_query(GetSellerRequest(seller_id=seller_id))
+    return {
+        "id": seller.identity.value,
+        "user_id": seller.user_id.value,
+        "store_name": seller.store_name,
+        "store_logs": seller.store_logs,
+        "contact_info": seller.contact_info,
+        "return_policy": seller.return_policy,
+        "delivery_terms": seller.delivery_terms,
+        "is_active": seller.is_active,
+    }
 
 
 @seller_router.patch("/{seller_id}", status_code=status.HTTP_204_NO_CONTENT)

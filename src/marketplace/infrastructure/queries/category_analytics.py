@@ -18,22 +18,30 @@ class CategoryAnalyticsQuery:
     async def get_category_distribution(self) -> list[dict[str, object]]:
         stmt = text(
             """
+            WITH category_stats AS (
+                SELECT
+                    c.category_id,
+                    c.name,
+                    COUNT(p.product_id) AS product_count,
+                    COALESCE(AVG(p.price), 0) AS avg_price
+                FROM categories c
+                LEFT JOIN products p
+                    ON p.category_id = c.category_id AND p.is_active = true
+                GROUP BY c.category_id, c.name
+            )
             SELECT COALESCE(
                 json_agg(
                     json_build_object(
-                        'id', c.category_id,
-                        'name', c.name,
-                        'product_count', COUNT(p.product_id),
-                        'avg_price', COALESCE(AVG(p.price), 0)
+                        'id', cs.category_id,
+                        'name', cs.name,
+                        'product_count', cs.product_count,
+                        'avg_price', cs.avg_price
                     )
-                    ORDER BY COUNT(p.product_id) DESC
+                    ORDER BY cs.product_count DESC
                 ),
                 '[]'::json
             )
-            FROM categories c
-            LEFT JOIN products p
-                ON p.category_id = c.category_id AND p.is_active = true
-            GROUP BY c.category_id, c.name
+            FROM category_stats cs
             """
         )
         result = await self._session.scalar(stmt)

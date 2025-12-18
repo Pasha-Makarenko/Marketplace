@@ -16,10 +16,11 @@ class ProductAnalyticsQuery:
                     p.product_id,
                     p.name,
                     p.price,
-                    AVG(r.rating) AS avg_rating,
-                    COUNT(r.review_id) AS review_count
+                    AVG(rt.value) AS avg_rating,
+                    COUNT(rv.review_id) AS review_count
                 FROM products p
-                LEFT JOIN reviews r ON r.product_id = p.product_id
+                LEFT JOIN ratings rt ON rt.product_id = p.product_id
+                LEFT JOIN reviews rv ON rv.product_id = p.product_id
                 WHERE p.is_active = true
                 GROUP BY p.product_id, p.name, p.price
             )
@@ -38,7 +39,10 @@ class ProductAnalyticsQuery:
                 '[]'::json
             )
             FROM (
-                SELECT * FROM product_ratings LIMIT :limit
+                SELECT *
+                FROM product_ratings
+                ORDER BY avg_rating DESC NULLS LAST, review_count DESC
+                LIMIT :limit
             ) pr
             """
         )
