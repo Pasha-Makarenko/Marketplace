@@ -24,6 +24,7 @@ categories_table = Table(
         Integer,
         ForeignKey("categories.category_id", ondelete="SET NULL"),
         nullable=True,
+        index=True,
     ),
     CheckConstraint(
         "category_id <> parent_category_id", "ch_categories_parent_category_id"
@@ -39,6 +40,6 @@ mapper_registry.map_imperatively(
         "parent_category_id": composite(
             Identity, categories_table.c.parent_category_id
         ),
+        "_parent_category_id_raw": categories_table.c.parent_category_id,
     },
-    exclude_properties=["created_at"],
 )

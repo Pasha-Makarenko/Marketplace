@@ -8,9 +8,10 @@ class Seller:
     identity: Identity
     user_id: Identity
     store_name: str
-    contact_info: str
-    return_policy: str
-    delivery_terms: str
+    store_logs: str | None
+    contact_info: str | None
+    return_policy: str | None
+    delivery_terms: str | None
     is_active: bool
 
     def set_store_name(self, store_name: str) -> None:

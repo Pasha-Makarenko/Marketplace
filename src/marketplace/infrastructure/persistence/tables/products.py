@@ -21,7 +21,7 @@ products_table = Table(
     "products",
     mapper_registry.metadata,
     Column("product_id", Integer, primary_key=True, autoincrement=True),
-    Column("name", String(255), nullable=False),
+    Column("name", String(255), nullable=False, index=True),
     Column("description", Text, nullable=True),
     Column("price", Numeric(10, 2), nullable=False),
     Column("discount", Integer, nullable=False, default=0),
@@ -31,12 +31,14 @@ products_table = Table(
         Integer,
         ForeignKey("seller_profiles.seller_id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     ),
     Column(
         "category_id",
         Integer,
         ForeignKey("categories.category_id", ondelete="RESTRICT"),
         nullable=False,
+        index=True,
     ),
     Column("created_at", DateTime, nullable=False, server_default=func.now()),
     Column(
@@ -65,6 +67,8 @@ mapper_registry.map_imperatively(
         "stock_quantity": products_table.c.stock_quantity,
         "owner_id": composite(Identity, products_table.c.owner_id),
         "category_id": composite(Identity, products_table.c.category_id),
+        "_owner_id_raw": products_table.c.owner_id,
+        "_category_id_raw": products_table.c.category_id,
         "is_active": products_table.c.is_active,
     },
 )

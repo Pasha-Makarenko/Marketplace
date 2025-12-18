@@ -15,6 +15,7 @@ from marketplace.application.common.id_provider import IdProvider
 from marketplace.application.common.transaction_manager import (
     TransactionManager,
 )
+from marketplace.application.feedback.leave_feedback import LeaveFeedback
 from marketplace.application.order.cancel_order import CancelOrderCommand
 from marketplace.application.order.checkout_order import CheckoutOrderCommand
 from marketplace.application.order.fulfill_order import FulfillOrderCommand
@@ -24,14 +25,29 @@ from marketplace.application.product.delete import DeleteProduct
 from marketplace.application.product.get import GetProduct
 from marketplace.application.product.list import ListProducts
 from marketplace.application.product.update import UpdateProduct
+from marketplace.application.rating.analytics import (
+    GetProductAverageRating,
+    GetRatingDistribution,
+)
+from marketplace.application.rating.create import CreateRating
+from marketplace.application.rating.list import ListRatings
+from marketplace.application.review.analytics import GetRecentReviews
+from marketplace.application.review.create import CreateReview
+from marketplace.application.review.list import ListReviews
 from marketplace.application.seller.create import CreateSeller
 from marketplace.application.seller.get import GetSeller
 from marketplace.application.seller.list import ListSellers
 from marketplace.application.seller.update import UpdateSeller
 from marketplace.application.user.register import RegisterUserCommand
+from marketplace.domain.entities.category.factory import CategoryFactory
 from marketplace.domain.entities.category.repository import CategoryRepository
 from marketplace.domain.entities.order.repository import OrderRepository
+from marketplace.domain.entities.product.factory import ProductFactory
 from marketplace.domain.entities.product.repository import ProductRepository
+from marketplace.domain.entities.rating.factory import RatingFactory
+from marketplace.domain.entities.rating.repository import RatingRepository
+from marketplace.domain.entities.review.factory import ReviewFactory
+from marketplace.domain.entities.review.repository import ReviewRepository
 from marketplace.domain.entities.seller.factory import SellerFactory
 from marketplace.domain.entities.seller.repository import SellerRepository
 from marketplace.domain.entities.user.factory import UserFactory
@@ -48,6 +64,12 @@ from marketplace.infrastructure.persistence.order_repo import (
 from marketplace.infrastructure.persistence.product_repo import (
     SQLProductRepository,
 )
+from marketplace.infrastructure.persistence.rating_repo import (
+    SQLRatingRepository,
+)
+from marketplace.infrastructure.persistence.review_repo import (
+    SQLReviewRepository,
+)
 from marketplace.infrastructure.persistence.seller_repo import (
     SQLSellerRepository,
 )
@@ -62,10 +84,19 @@ from marketplace.infrastructure.persistence.transaction_manager import (
     SQLTransactionManager,
 )
 from marketplace.infrastructure.persistence.user_repo import SQLUserRepository
+from marketplace.infrastructure.queries.category_analytics import (
+    CategoryAnalyticsQuery,
+)
 from marketplace.infrastructure.queries.order_queries import (
     DailyRevenueQuery,
     OrderStatusStatsQuery,
     UserOrdersQuery,
+)
+from marketplace.infrastructure.queries.product_analytics import (
+    ProductAnalyticsQuery,
+)
+from marketplace.infrastructure.queries.seller_analytics import (
+    SellerAnalyticsQuery,
 )
 from marketplace.infrastructure.session_id_provider import (
     FastAPISessionIDGetter,
@@ -142,10 +173,12 @@ class CategoryProvider(Provider):
         source=SQLCategoryRepository,
         provides=AnyOf[CategoryRepository, SQLCategoryRepository],
     )
+    factory = provide(scope=Scope.REQUEST, source=CategoryFactory)
     create_category = provide(scope=Scope.REQUEST, source=CreateCategory)
     delete_category = provide(scope=Scope.REQUEST, source=DeleteCategory)
     get_category = provide(scope=Scope.REQUEST, source=GetCategory)
     list_categories = provide(scope=Scope.REQUEST, source=ListCategories)
+    analytics = provide(scope=Scope.REQUEST, source=CategoryAnalyticsQuery)
 
 
 class SellerProvider(Provider):
@@ -159,6 +192,7 @@ class SellerProvider(Provider):
     update_seller = provide(scope=Scope.REQUEST, source=UpdateSeller)
     get_seller = provide(scope=Scope.REQUEST, source=GetSeller)
     list_sellers = provide(scope=Scope.REQUEST, source=ListSellers)
+    analytics = provide(scope=Scope.REQUEST, source=SellerAnalyticsQuery)
 
 
 class ProductProvider(Provider):
@@ -167,11 +201,13 @@ class ProductProvider(Provider):
         source=SQLProductRepository,
         provides=AnyOf[ProductRepository, SQLProductRepository],
     )
+    factory = provide(scope=Scope.REQUEST, source=ProductFactory)
     create_product = provide(scope=Scope.REQUEST, source=CreateProduct)
     update_product = provide(scope=Scope.REQUEST, source=UpdateProduct)
     delete_product = provide(scope=Scope.REQUEST, source=DeleteProduct)
     list_products = provide(scope=Scope.REQUEST, source=ListProducts)
     get_product = provide(scope=Scope.REQUEST, source=GetProduct)
+    analytics = provide(scope=Scope.REQUEST, source=ProductAnalyticsQuery)
 
 
 class OrderProvider(Provider):
@@ -191,3 +227,34 @@ class OrderProvider(Provider):
     daily_revenue_query = provide(
         scope=Scope.REQUEST, source=DailyRevenueQuery
     )
+
+
+class ReviewProvider(Provider):
+    review_repo = provide(
+        scope=Scope.REQUEST,
+        source=SQLReviewRepository,
+        provides=AnyOf[ReviewRepository, SQLReviewRepository],
+    )
+    factory = provide(scope=Scope.REQUEST, source=ReviewFactory)
+    create_review = provide(scope=Scope.REQUEST, source=CreateReview)
+    list_reviews = provide(scope=Scope.REQUEST, source=ListReviews)
+    get_recent = provide(scope=Scope.REQUEST, source=GetRecentReviews)
+
+
+class RatingProvider(Provider):
+    rating_repo = provide(
+        scope=Scope.REQUEST,
+        source=SQLRatingRepository,
+        provides=AnyOf[RatingRepository, SQLRatingRepository],
+    )
+    factory = provide(scope=Scope.REQUEST, source=RatingFactory)
+    create_rating = provide(scope=Scope.REQUEST, source=CreateRating)
+    list_ratings = provide(scope=Scope.REQUEST, source=ListRatings)
+    get_distribution = provide(
+        scope=Scope.REQUEST, source=GetRatingDistribution
+    )
+    get_average = provide(scope=Scope.REQUEST, source=GetProductAverageRating)
+
+
+class FeedbackProvider(Provider):
+    leave_feedback = provide(scope=Scope.REQUEST, source=LeaveFeedback)
