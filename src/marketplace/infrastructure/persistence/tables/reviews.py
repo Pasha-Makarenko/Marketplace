@@ -47,8 +47,8 @@ mapper_registry.map_imperatively(
     reviews_table,
     properties={
         "identity": composite(Identity, reviews_table.c.review_id),
-        "author_id": composite(Identity, reviews_table.c.author_id),
-        "product_id": composite(Identity, reviews_table.c.product_id),
+        "author_identity": composite(Identity, reviews_table.c.author_id),
+        "product_identity": composite(Identity, reviews_table.c.product_id),
         "rating": reviews_table.c.rating,
         "text": reviews_table.c.text,
         "created_at": reviews_table.c.created_at,

@@ -65,8 +65,8 @@ mapper_registry.map_imperatively(
         "price": products_table.c.price,
         "discount": products_table.c.discount,
         "stock_quantity": products_table.c.stock_quantity,
-        "owner_id": composite(Identity, products_table.c.owner_id),
-        "category_id": composite(Identity, products_table.c.category_id),
+        "owner_identity": composite(Identity, products_table.c.owner_id),
+        "category_identity": composite(Identity, products_table.c.category_id),
         "is_active": products_table.c.is_active,
     },
 )

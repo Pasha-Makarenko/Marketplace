@@ -37,9 +37,7 @@ mapper_registry.map_imperatively(
     properties={
         "identity": composite(Identity, categories_table.c.category_id),
         "name": categories_table.c.name,
-        "parent_category_id": composite(
-            Identity, categories_table.c.parent_category_id
-        ),
+        "parent_identity": composite(Identity, categories_table.c.parent_category_id),
     },
     exclude_properties=["created_at"],
 )
