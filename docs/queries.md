@@ -1,11 +1,10 @@
 Аналітика та приклади запитів
 =============================
 
-Запит 1: Топ рейтингових товарів
---------------------------------
-Бізнес-питання: показати активні товари в порядку середнього рейтингу та кількості відгуків.
+Запит 1: Топ рейтингових товарів (ProductAnalyticsQuery.get_top_rated_products)
+-------------------------------------------------------------------------------
+Бізнес-питання: показати активні товари за середнім рейтингом та кількістю відгуків.
 
-SQL (використовується в `ProductAnalyticsQuery.get_top_rated_products`):
 ```sql
 WITH product_ratings AS (
     SELECT
@@ -42,20 +41,14 @@ FROM (
 ) pr;
 ```
 Пояснення:
-- JOIN `ratings` + `reviews` для середнього рейтингу та кількості відгуків.
-- Фільтр лише активних товарів.
-- Сортування за рейтингом, далі за кількістю відгуків.
+- CTE `product_ratings`: для кожного активного товару робить LEFT JOIN з `ratings` і `reviews`, рахує `AVG(rt.value)` та `COUNT(rv.review_id)`.
+- Далі вибирає все з CTE, сортує за `avg_rating` DESC (NULLS LAST), потім за `review_count` DESC, обмежує `LIMIT :limit`.
+- Обгортає результат у `json_agg/json_build_object`, повертає JSON-масив товарів з полями id, name, price, avg_rating, review_count.
 
-Приклад виводу (JSON):
-```json
-[{"id":1,"name":"A","price":100.0,"avg_rating":4.5,"review_count":3}]
-```
+Запит 2: Товари з низьким складом (ProductAnalyticsQuery.get_low_stock_products)
+-------------------------------------------------------------------------------
+Бізнес-питання: знайти активні товари з малим залишком.
 
-Запит 2: Товари з низьким складом
----------------------------------
-Бізнес-питання: показати активні товари з невеликим залишком.
-
-SQL (в `ProductAnalyticsQuery.get_low_stock_products`):
 ```sql
 SELECT COALESCE(
     json_agg(
@@ -72,90 +65,176 @@ SELECT COALESCE(
 FROM products p
 WHERE p.stock_quantity <= :threshold AND p.is_active = true;
 ```
-Пояснення:
-- Фільтр `stock_quantity <= :threshold` та `is_active`.
-- Сортування за зростанням залишку.
+Пояснення (по кроках):
+- Фільтрує `products` за `stock_quantity <= :threshold` і `is_active = true`.
+- Сортує за `stock_quantity` ASC, будує JSON через `json_agg/json_build_object`.
+- Повертає масив з id, name, stock_quantity, seller_id.
 
-Приклад виводу (JSON):
-```json
-[{"id":2,"name":"B","stock_quantity":3,"seller_id":5}]
-```
+Запит 3: Розподіл по категоріях (CategoryAnalyticsQuery.get_category_distribution)
+---------------------------------------------------------------------------------
+Бізнес-питання: скільки товарів у категоріях і яка середня ціна.
 
-Запит 3: Продуктивність продавців
----------------------------------
-Бізнес-питання: скільки товарів та замовлень у кожного продавця.
-
-SQL (спрощено з `seller_analytics.py`):
 ```sql
-SELECT
-    s.seller_id,
-    s.store_name,
-    COUNT(DISTINCT p.product_id) AS product_count,
-    COUNT(DISTINCT o.order_id) AS order_count
-FROM seller_profiles s
-LEFT JOIN products p ON p.owner_id = s.seller_id
-LEFT JOIN orders o ON o.user_id = s.user_id
-GROUP BY s.seller_id, s.store_name
-ORDER BY product_count DESC, order_count DESC;
+WITH category_stats AS (
+    SELECT
+        c.category_id,
+        c.name,
+        COUNT(p.product_id) AS product_count,
+        COALESCE(AVG(p.price), 0) AS avg_price
+    FROM categories c
+    LEFT JOIN products p
+        ON p.category_id = c.category_id AND p.is_active = true
+    GROUP BY c.category_id, c.name
+)
+SELECT COALESCE(
+    json_agg(
+        json_build_object(
+            'id', cs.category_id,
+            'name', cs.name,
+            'product_count', cs.product_count,
+            'avg_price', cs.avg_price
+        )
+        ORDER BY cs.product_count DESC
+    ),
+    '[]'::json
+)
+FROM category_stats cs;
 ```
 Пояснення:
-- LEFT JOIN товарів і замовлень до профілю продавця.
-- Агрегація за продавцем, сортування за кількістю товарів/замовлень.
+- CTE `category_stats`: LEFT JOIN активних продуктів до категорій, рахує `COUNT(product_id)` і `AVG(price)` (COALESCE до 0), групує по категорії.
+- З CTE формує JSON-агрегацію, сортує за `product_count` DESC.
+- Повертає масив з id, name, product_count, avg_price.
 
-Приклад виводу:
-```
-seller_id | store_name | product_count | order_count
-1         | Shop A     | 12            | 30
-```
+Запит 4: Топ продавців (SellerAnalyticsQuery.get_top_sellers)
+-------------------------------------------------------------
+Бізнес-питання: показати активних продавців за середнім рейтингом та кількістю товарів.
 
-Запит 4: Розподіл по категоріях
--------------------------------
-Бізнес-питання: скільки товарів у кожній категорії.
-
-SQL (з `category_analytics.py`):
 ```sql
-SELECT
-    c.category_id,
-    c.name,
-    COUNT(p.product_id) AS product_count
-FROM categories c
-LEFT JOIN products p ON p.category_id = c.category_id
-GROUP BY c.category_id, c.name
-ORDER BY product_count DESC;
+WITH seller_stats AS (
+    SELECT
+        s.seller_id,
+        s.store_name,
+        COUNT(DISTINCT p.product_id) AS total_products,
+        AVG(rat.value) AS avg_seller_rating,
+        COUNT(rat.rating_id) AS total_ratings
+    FROM seller_profiles s
+    LEFT JOIN products p
+        ON p.owner_id = s.seller_id AND p.is_active = true
+    LEFT JOIN ratings rat ON rat.product_id = p.product_id
+    WHERE s.is_active = true
+    GROUP BY s.seller_id, s.store_name
+)
+SELECT COALESCE(
+    json_agg(
+        json_build_object(
+            'id', ss.seller_id,
+            'store_name', ss.store_name,
+            'total_products', ss.total_products,
+            'average_rating', COALESCE(ss.avg_seller_rating, 0),
+            'total_ratings', ss.total_ratings
+        )
+        ORDER BY ss.avg_seller_rating DESC NULLS LAST
+    ),
+    '[]'::json
+)
+FROM (
+    SELECT * FROM seller_stats LIMIT :limit
+) ss;
 ```
 Пояснення:
-- LEFT JOIN категорій до товарів, COUNT по товарах.
-- Сортування за кількістю.
+- CTE `seller_stats`: для активних продавців робить LEFT JOIN активних продуктів і їхніх рейтинґів; рахує кількість продуктів, `AVG(rat.value)` та `COUNT(rat.rating_id)`.
+- З CTE вибирає, обмежує `LIMIT :limit`, сортує за `avg_seller_rating` DESC (NULLS LAST).
+- Формує JSON-агрегацію з полями id, store_name, total_products, average_rating, total_ratings.
 
-Приклад виводу:
-```
-category_id | name   | product_count
-10          | Одяг   | 42
-```
+Запит 5: Замовлення користувача (UserOrdersQuery.fetch)
+--------------------------------------------------------
+Бізнес-питання: отримати замовлення поточного користувача з сумою та кількістю позицій.
 
-Запит 5: Денний дохід
----------------------
-Бізнес-питання: дохід на день (з `order_queries.py`).
-
-SQL:
 ```sql
-SELECT
-    DATE_TRUNC('day', o.created_at) AS day,
-    SUM(oi.quantity * oi.price_at_purchase) AS revenue
-FROM orders o
-JOIN order_items oi ON oi.order_id = o.order_id
-WHERE o.status = 'completed'
-GROUP BY DATE_TRUNC('day', o.created_at)
-ORDER BY day DESC;
+WITH order_totals AS (
+    SELECT
+        o.order_id,
+        o.status,
+        o.created_at,
+        o.updated_at,
+        COALESCE(
+            SUM(oi.price_at_purchase * oi.quantity),
+            0
+        ) AS total_amount,
+        COALESCE(SUM(oi.quantity), 0) AS items_count
+    FROM orders o
+    LEFT JOIN order_items oi ON oi.order_id = o.order_id
+    WHERE o.user_id = :user_id
+    GROUP BY o.order_id, o.status, o.created_at, o.updated_at
+)
+SELECT COALESCE(
+    json_agg(
+        json_build_object(
+            'id', ot.order_id,
+            'status', ot.status,
+            'created_at', ot.created_at,
+            'updated_at', ot.updated_at,
+            'total_amount', ot.total_amount,
+            'items_count', ot.items_count
+        )
+        ORDER BY ot.created_at DESC
+    ),
+    '[]'::json
+) AS orders_json
+FROM order_totals ot;
 ```
 Пояснення:
-- JOIN `orders` + `order_items`, сумування кількості * ціна.
-- Фільтр завершених замовлень.
-- Групування по дню, сортування за датою.
+- CTE `order_totals`: LEFT JOIN `order_items` до замовлень користувача (`:user_id`), рахує `SUM(price_at_purchase*quantity)` і `SUM(quantity)` по кожному замовленню.
+- Групує по order_id, статусу, created_at, updated_at.
+- З CTE формує JSON-агрегацію, сортує за `created_at` DESC; повертає масив замовлень із сумою та кількістю позицій.
 
-Приклад виводу:
+Запит 6: Статистика статусів замовлень (OrderStatusStatsQuery.fetch)
+--------------------------------------------------------------------
+Бізнес-питання: скільки замовлень у кожному статусі.
+
+```sql
+SELECT COALESCE(json_object_agg(status, cnt), '{}'::json) AS stats
+FROM (
+    SELECT status, COUNT(*) AS cnt
+    FROM orders
+    GROUP BY status
+) s;
 ```
-day        | revenue
-2025-01-01 | 15230.50
+Пояснення (по кроках):
+- Внутрішній запит групує `orders` за `status`, рахує `COUNT(*)`.
+- Зовнішній шар перетворює пари статус→кількість у JSON-об’єкт через `json_object_agg`, COALESCE до порожнього `{}`.
+
+Запит 7: Денний дохід (DailyRevenueQuery.fetch)
+----------------------------------------------
+Бізнес-питання: дохід за днями для оплачених замовлень за останні N днів.
+
+```sql
+WITH daily AS (
+    SELECT
+        DATE_TRUNC('day', o.paid_at) AS day,
+        SUM(oi.price_at_purchase * oi.quantity) AS revenue,
+        COUNT(DISTINCT o.order_id) AS orders
+    FROM orders o
+    JOIN order_items oi ON oi.order_id = o.order_id
+    WHERE o.paid_at IS NOT NULL
+      AND o.paid_at >= :since
+    GROUP BY DATE_TRUNC('day', o.paid_at)
+)
+SELECT COALESCE(
+    json_agg(
+        json_build_object(
+            'day', to_char(day, 'YYYY-MM-DD'),
+            'revenue', revenue,
+            'orders', orders
+        )
+        ORDER BY day DESC
+    ),
+    '[]'::json
+) AS revenue_json
+FROM daily;
 ```
+Пояснення:
+- CTE `daily`: бере оплачені замовлення (`paid_at IS NOT NULL`), фільтрує за `paid_at >= :since`; JOIN з `order_items`; групує по дню `DATE_TRUNC('day', paid_at)`; рахує `SUM(price_at_purchase*quantity)` та `COUNT(DISTINCT order_id)`.
+- З CTE формує JSON-агрегацію, сортує за днем DESC, приводить день до формату `YYYY-MM-DD`.
+- Повертає масив об’єктів day/revenue/orders.
 
