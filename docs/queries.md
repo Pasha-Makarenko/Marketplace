@@ -1,12 +1,12 @@
 Аналітика та приклади запитів
 =============================
 
-Топ рейтингових товарів
------------------------
+Запит 1: Топ рейтингових товарів
+--------------------------------
 Бізнес-питання: показати активні товари в порядку середнього рейтингу та кількості відгуків.
 
 SQL (використовується в `ProductAnalyticsQuery.get_top_rated_products`):
-```
+```sql
 WITH product_ratings AS (
     SELECT
         p.product_id,
@@ -41,14 +41,22 @@ FROM (
     LIMIT :limit
 ) pr;
 ```
-Форма результату: масив об’єктів `{id, name, price, avg_rating, review_count}`.
+Пояснення:
+- JOIN `ratings` + `reviews` для середнього рейтингу та кількості відгуків.
+- Фільтр лише активних товарів.
+- Сортування за рейтингом, далі за кількістю відгуків.
 
-Товари з низьким складом
-------------------------
+Приклад виводу (JSON):
+```json
+[{"id":1,"name":"A","price":100.0,"avg_rating":4.5,"review_count":3}]
+```
+
+Запит 2: Товари з низьким складом
+---------------------------------
 Бізнес-питання: показати активні товари з невеликим залишком.
 
 SQL (в `ProductAnalyticsQuery.get_low_stock_products`):
-```
+```sql
 SELECT COALESCE(
     json_agg(
         json_build_object(
@@ -64,14 +72,21 @@ SELECT COALESCE(
 FROM products p
 WHERE p.stock_quantity <= :threshold AND p.is_active = true;
 ```
-Параметр: `:threshold` (типово 5). Повертає JSON-масив.
+Пояснення:
+- Фільтр `stock_quantity <= :threshold` та `is_active`.
+- Сортування за зростанням залишку.
 
-Продуктивність продавців
-------------------------
+Приклад виводу (JSON):
+```json
+[{"id":2,"name":"B","stock_quantity":3,"seller_id":5}]
+```
+
+Запит 3: Продуктивність продавців
+---------------------------------
 Бізнес-питання: скільки товарів та замовлень у кожного продавця.
 
 SQL (спрощено з `seller_analytics.py`):
-```
+```sql
 SELECT
     s.seller_id,
     s.store_name,
@@ -83,14 +98,22 @@ LEFT JOIN orders o ON o.user_id = s.user_id
 GROUP BY s.seller_id, s.store_name
 ORDER BY product_count DESC, order_count DESC;
 ```
-Корисно для адмінських дашбордів.
+Пояснення:
+- LEFT JOIN товарів і замовлень до профілю продавця.
+- Агрегація за продавцем, сортування за кількістю товарів/замовлень.
 
-Розподіл по категоріях
-----------------------
+Приклад виводу:
+```
+seller_id | store_name | product_count | order_count
+1         | Shop A     | 12            | 30
+```
+
+Запит 4: Розподіл по категоріях
+-------------------------------
 Бізнес-питання: скільки товарів у кожній категорії.
 
 SQL (з `category_analytics.py`):
-```
+```sql
 SELECT
     c.category_id,
     c.name,
@@ -100,12 +123,22 @@ LEFT JOIN products p ON p.category_id = c.category_id
 GROUP BY c.category_id, c.name
 ORDER BY product_count DESC;
 ```
-Повертає рядки по категоріях з кількістю товарів.
+Пояснення:
+- LEFT JOIN категорій до товарів, COUNT по товарах.
+- Сортування за кількістю.
 
-Денний дохід
-------------
-Бізнес-питання: дохід на день (з `order_queries.py`):
+Приклад виводу:
 ```
+category_id | name   | product_count
+10          | Одяг   | 42
+```
+
+Запит 5: Денний дохід
+---------------------
+Бізнес-питання: дохід на день (з `order_queries.py`).
+
+SQL:
+```sql
 SELECT
     DATE_TRUNC('day', o.created_at) AS day,
     SUM(oi.quantity * oi.price_at_purchase) AS revenue
@@ -115,5 +148,14 @@ WHERE o.status = 'completed'
 GROUP BY DATE_TRUNC('day', o.created_at)
 ORDER BY day DESC;
 ```
-Показує денний дохід за завершеними замовленнями.
+Пояснення:
+- JOIN `orders` + `order_items`, сумування кількості * ціна.
+- Фільтр завершених замовлень.
+- Групування по дню, сортування за датою.
+
+Приклад виводу:
+```
+day        | revenue
+2025-01-01 | 15230.50
+```
 
